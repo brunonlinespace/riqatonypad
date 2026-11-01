@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.brunonlinespace.riqatonypad</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="io.github.brunonlinespace"><name>Bruno Machado</name></developer>
+  <name>RiqatonyPad</name>
+  <summary>Lightweight Rich Text Format editor</summary>
+  <description>
+    <p>RiqatonyPad is a lightweight, portable editor dedicated to Rich Text Format documents.</p>
+  </description>
+  <launchable type="desktop-id">riqatonypad.desktop</launchable>
+  <url type="homepage">https://github.com/brunonlinespace/riqatonypad</url>
+  <url type="bugtracker">https://github.com/brunonlinespace/riqatonypad/issues</url>
+  <content_rating type="oars-1.1"/>
+  <provides>
+    <mediatype>text/rtf</mediatype>
+    <mediatype>application/rtf</mediatype>
+  </provides>
+  <releases><release version="2.0.0" date="2026-11-01"><description><p>Promote the x16.9 source to final 2.0.0 without editor or packaging behavior changes.</p></description></release></releases>
+</component>

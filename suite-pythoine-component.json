@@ -1,0 +1,24 @@
+{
+  "id": "riqatonypad",
+  "name": "RiqatonyPad",
+  "description": "A lightweight Rich Text Format (RTF) editor.",
+  "component_kind": "editor",
+  "extensions": [
+    ".rtf"
+  ],
+  "portable_command": [
+    "main.py"
+  ],
+  "icon": "riqatony_pad/assets/icons/riqatonypad.png",
+  "version": "2.0.0",
+  "publisher": "brunonlinespace",
+  "repository": "https://github.com/brunonlinespace/riqatonypad",
+  "desktop_id": "riqatonypad",
+  "tagline": "Friendly. Fast. Focused.",
+  "publisher_id": "brunonlinespace",
+  "capabilities": {
+    "routing": true,
+    "open": true,
+    "create": true
+  }
+}

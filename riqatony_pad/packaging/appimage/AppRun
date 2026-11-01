@@ -1,0 +1,10 @@
+#!/bin/sh
+HERE="$(dirname "$(readlink -f "$0")")"
+export APPDIR="$HERE"
+export PATH="$HERE/usr/bin:$PATH"
+
+# Packaging QA selects one-launch System/Dark/Light chrome through RIQATONYPAD_APPIMAGE_THEME
+# and Modern/Classic/Legacy command icons through RIQATONYPAD_APPIMAGE_ICONSET.
+# Do not consume --appimage-* arguments here: that namespace belongs to the
+# AppImage runtime when the packaged artifact itself is invoked.
+exec "$HERE/usr/bin/riqatonypad" "$@"

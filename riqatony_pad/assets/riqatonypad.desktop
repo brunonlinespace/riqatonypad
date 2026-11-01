@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=RiqatonyPad
+GenericName=Rich Text Editor
+Comment=Lightweight Rich Text Format editor
+Exec=riqatonypad %F
+Icon=riqatonypad
+Terminal=false
+Categories=Utility;TextEditor;Office;
+MimeType=text/rtf;application/rtf;
+StartupNotify=true
+StartupWMClass=RiqatonyPad
