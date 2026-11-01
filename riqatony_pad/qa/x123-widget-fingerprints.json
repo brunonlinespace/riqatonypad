@@ -1,0 +1,42 @@
+{
+  "baseline": "2.0.0-x12.2",
+  "moved_definitions": {
+    "widgets/editor_commands_appearance.py": {
+      "EditorCommandsAppearanceMixin": "5a2285092604fddd031a0ab98d142ad7ea8b162ba4629659e7a8e1aba619b34f"
+    },
+    "widgets/editor_ribbon_retro.py": {
+      "EditorRibbonRetroMixin": "7a7ba42ac7d1c3ff6b2c500b03444a893a0e9c0b7baf812504298594dddeb295",
+      "RibbonScrollArea": "1953fde1ac38694b53c5ee864b35a078f799d7d0882737844bb1a785bfab9093"
+    },
+    "widgets/rwpyn/editor_formatting.py": {
+      "EditorFormattingMixin": "a181a3b09bd5060f6186258eed293671ffabf65aa0d130758ee4fb3591a6d7d8"
+    },
+    "widgets/rwpyn/editor_insertion.py": {
+      "EditorInsertionMixin": "d5a6895c38fd2240787ab4add4f3d5e6b9a23470e6ab79190b99524e8cd694fc",
+      "host_process_environment": "71dda3148d93bb1d98b4528b2b14894846b3216249fd72ce7331b0310bffb48f",
+      "read_bounded_bytes": "6f62a8e6d82208fcd84012a9f3723fe5d40d926b155e62bc20eab094788aa885"
+    },
+    "widgets/rwpyn/editor_lifecycle.py": {
+      "EditorFileLifecycleMixin": "449beaf93a0528390925102aa2971858d78deb66ea1d71dd690330f503d7b604"
+    },
+    "widgets/rwpyn/editor_preferences.py": {
+      "EditorPreferencesMixin": "d56ef0b5d2ffd612491c3c4a0847504ed75edd6275d8ab6c940f95c93dc4e0dc",
+      "preference_bool": "a3c7c9682c34d6c54187520ac6f56c0d122853c8452d2f51dc8e84089ee996b1",
+      "preference_text": "f13604d3d3d31d96b022d440591e106bcaf6a30ddc143af929de40d68ede053b",
+      "resource_path": "3e466e9c3ee3d9a12342db9524798667b93ccc876519dfdf912fde238c00a1ce"
+    },
+    "widgets/rwpyn/editor_printing.py": {
+      "EditorPrintingMixin": "30072fc598b1fcbfde2af99d9ac7b4da746a3d4befa065840dce59f7fb33018d",
+      "count_words": "bd27a7fd4a8f563e5334195d56db0a3b13d4e643d9d6153d64c60ba162a940a6",
+      "fsync_directory": "f854b08e89fd573bbb8b5b79820645ed940b782aa7b52a7c6a1f913ec10af28f"
+    },
+    "widgets/rwpyn/editor_search_view.py": {
+      "EditorSearchViewMixin": "82079d75f8df8dd0f84463d8f848631075161c7f6199cc081e5abb3080be77da"
+    },
+    "widgets/rwpyn/editor_widgets.py": {
+      "RichTextEdit": "85db30e8d70d30d1c8042f8d1b69450f5aa7c98a27fda7bb53abe8ba64ae4208",
+      "SafeTextDocument": "19f6a4bea493fbe97cbc15cbf115517c4cc366947695a609014229e526fd0d29"
+    }
+  },
+  "version": "2.0.0-x12.3"
+}

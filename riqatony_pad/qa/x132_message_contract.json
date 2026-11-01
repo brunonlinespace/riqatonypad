@@ -1,0 +1,83 @@
+{
+  "previous_version": "2.0.0-x13.1",
+  "current_version": "2.0.0-x13.2",
+  "allowed_edits": {
+    "app.py": {
+      "x131_sha256": "e65cfd59934763e37fd9decae7b74ca513582e26474d1fe4e7ac5cd520999645",
+      "replacements": [
+        {
+          "released": "# Version: 2.0.0-x13.2\n",
+          "previous": "# Version: 2.0.0-x13.1\n"
+        },
+        {
+          "released": "APP_VERSION = \"2.0.0-x13.2\"\n",
+          "previous": "APP_VERSION = \"2.0.0-x13.1\"\n"
+        },
+        {
+          "released": "            editor.setOverwriteMode(not editor.overwriteMode()); self.update_status_counts()\n            self._show_status_message(\"Overwrite mode enabled.\" if editor.overwriteMode() else \"Insert mode enabled.\", 2500)\n            return True\n",
+          "previous": "            editor.setOverwriteMode(not editor.overwriteMode()); self.update_status_counts(); return True\n"
+        }
+      ]
+    },
+    "widgets/rwpyn/editor_insertion.py": {
+      "x131_sha256": "0a0862a2577ea2a376656f0818874521f438124b9c73c46ac0115c14d3bef20d",
+      "replacements": [
+        {
+          "released": "        if not text:\n            self._show_status_message(\"Clipboard does not contain text that can be pasted.\", 3500)\n            return\n",
+          "previous": "        if not text: return\n"
+        }
+      ]
+    },
+    "widgets/rwpyn/editor_lifecycle.py": {
+      "x131_sha256": "354e9de334b235bde90584b86901ef7085683ecef368abc5e055485c03f7d690",
+      "replacements": [
+        {
+          "released": "        else:\n            self._show_status_message(f\"Opened {os.path.basename(self.file_path)} in an external editor.\", 3000)\n",
+          "previous": ""
+        },
+        {
+          "released": "        else:\n            self._show_status_message(f\"Opened the folder containing {os.path.basename(self.file_path)}.\", 3000)\n",
+          "previous": ""
+        },
+        {
+          "released": "        else: self._show_status_message(f\"Loaded {os.path.basename(self.file_path)}\", 3000)\n",
+          "previous": ""
+        },
+        {
+          "released": "            self._update_mode_capabilities(); self.update_title(); self.update_status_counts()\n            self._show_status_message(\"Saved.\", 2500)\n            return True\n",
+          "previous": "            self._update_mode_capabilities(); self.update_title(); self.update_status_counts(); return True\n"
+        },
+        {
+          "released": "            self._write_payload_atomically(payload); self.file_disk_signature=self._content_signature(payload); self._synchronise_after_save(payload, semantic_signature=semantic_signature, preserve_warnings=clean_source); self.content_saved=True; self._set_external_change_pending(False); self._rebind_file_watcher(self.file_path); self._update_mode_capabilities(); self.update_title(); self.update_status_counts()\n            self._show_status_message(\"Saved.\", 2500)\n            return True\n",
+          "previous": "            self._write_payload_atomically(payload); self.file_disk_signature=self._content_signature(payload); self._synchronise_after_save(payload, semantic_signature=semantic_signature, preserve_warnings=clean_source); self.content_saved=True; self._set_external_change_pending(False); self._rebind_file_watcher(self.file_path); self._update_mode_capabilities(); self.update_title(); self.update_status_counts(); return True\n"
+        },
+        {
+          "released": "        self._show_status_message(f\"Renamed {old_name} to {os.path.basename(new_path)}\", 3000)\n",
+          "previous": ""
+        },
+        {
+          "released": "            if not forbidden_paths:\n                self._show_status_message(f\"Saved as {os.path.basename(target_path)}\", 3000)\n",
+          "previous": ""
+        }
+      ]
+    }
+  },
+  "other_production_files": {
+    "rich_text_support.py": "6c6d7152ad306788a72d420401a4563506e72150c389e80a61a5bdbc8d235fdb",
+    "rtf_new_document.py": "ba2f1ff8b44f401c5c2896fa09a37e292ba2812c7c224ecbdebf747af3989120",
+    "editor_platform_startup.py": "1eb00f01718bd478b6badb9949722ebd49da333881a1ecb3473b38f7a4fc9108",
+    "rtf_codec.py": "598938f533f0b562c55c901d46daef1c6de8bc788ff96eeed387d428737666b8",
+    "widgets/keyboard_shortcuts.py": "94732290ea6142464e326eb07224690e5da6ad49d0c7a80bb418f0879ca74472",
+    "widgets/editor_ribbon_retro.py": "98f085823e3abffcb5fefd6fd7680e279ba3feade659308e73dd7c0174292728",
+    "widgets/editor_commands_appearance.py": "ef83b18022b944dfbc746a4226cf858361a63fee223ae1e29760368f4da2baa1",
+    "widgets/__init__.py": "95a6058672869093ff75bd18d0643ec04fbb6e08dcbb2c2aa3c6d748ec414d45",
+    "widgets/quick_tour.py": "9981c3d1a1e17baf7385e21762a8a937ddda5da4ce6030e29e6897c9292f636b",
+    "widgets/about_dialog.py": "cedda17d82011479457650f3a80110ba762cc181ee6ee0e94e1b7c4147ce246e",
+    "widgets/rwpyn/editor_search_view.py": "e504ce604f63aff669468e93bbf7e2a4562e348a47bf0469243b702977f8c623",
+    "widgets/rwpyn/editor_printing.py": "45469995a0a2f0086b0c5ba6fbeabb45847a286487270570cabbc130b4e0ad36",
+    "widgets/rwpyn/editor_formatting.py": "4084708f05825f564168278a469f13bc69b94171d97d3a60c32352fb5cb39dd0",
+    "widgets/rwpyn/editor_widgets.py": "22246a7ea36d431208e5da4bd1665c9481cc389e86fc0f9d5eb605bc776d86c3",
+    "widgets/rwpyn/editor_preferences.py": "73bc6a89d5af384da21f81fddd2dc3c639219cc3df3171a4c596f3d4bc4f5aef",
+    "widgets/rwpyn/__init__.py": "95a6058672869093ff75bd18d0643ec04fbb6e08dcbb2c2aa3c6d748ec414d45"
+  }
+}
