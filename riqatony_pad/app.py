@@ -5,7 +5,7 @@
 #
 # GPLv3-or-later
 #
-# Version: 2.0.0
+# Version: 2.1.2
 # ==============================================================================
 
 import base64
@@ -81,7 +81,7 @@ from editor_platform_startup import (
 import editor_platform_startup as _editor_platform_startup
 from widgets.editor_ribbon_retro import EditorRibbonRetroMixin, RibbonScrollArea, RIBBON_BUTTON_SIZE, RIBBON_ICON_SIZE, RIBBON_FONT_FAMILY_WIDTH
 from widgets.rwpyn.editor_lifecycle import EditorFileLifecycleMixin, MAX_FILE_SIZE, RTF_EXTENSIONS, DOCUMENT_EXTENSIONS
-from widgets.editor_commands_appearance import EditorCommandsAppearanceMixin, RETRO_TOOLBAR_DEFAULT, COMMAND_SURFACE_SPECS, RETRO_TOOLBAR_ALLOWED
+from widgets.editor_commands_appearance import AppearanceThemeGuard, EditorCommandsAppearanceMixin, RETRO_TOOLBAR_DEFAULT, COMMAND_SURFACE_SPECS, RETRO_TOOLBAR_ALLOWED
 import widgets.editor_commands_appearance as _editor_commands_appearance
 from widgets.rwpyn.editor_printing import EditorPrintingMixin, APP_NAME, fsync_directory, count_words
 from widgets.rwpyn.editor_search_view import EditorSearchViewMixin, MAX_SEARCH_MATCHES
@@ -99,13 +99,13 @@ from rtf_codec import (
     MAX_RTF_TABLE_ROWS, MAX_RTF_TABLE_COLUMNS, MAX_RTF_TABLE_CELLS,
 )
 
-APP_VERSION = "2.0.0"
+APP_VERSION = "2.1.2"
 
 # Canonical dual-interface profile. Ribbon remains the default; Retro is a
 # persistent alternative presentation using the same command registry, shortcuts
 # and bundled icon family. The registry is deliberately presentation-neutral:
 # Ribbon chooses its two-row grouping while Retro exposes every applicable item
-# through Customise Retro Bar.
+# through Retro Settings.
 import widgets.rwpyn.editor_preferences as _editor_preferences
 _editor_preferences.RETRO_TOOLBAR_DEFAULT = RETRO_TOOLBAR_DEFAULT
 _editor_preferences.RETRO_TOOLBAR_ALLOWED = RETRO_TOOLBAR_ALLOWED
@@ -267,6 +267,7 @@ class RiqatonyPad(EditorFileLifecycleMixin, EditorCommandsAppearanceMixin, Edito
         finally:
             self._loading = False
         self.apply_native_style()
+        self._appearance_theme_guard = AppearanceThemeGuard(self)
         self.update_title()
         self.update_status_counts()
         self.update_search_counter()
