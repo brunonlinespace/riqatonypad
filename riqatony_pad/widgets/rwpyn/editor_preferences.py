@@ -118,7 +118,7 @@ class EditorPreferencesMixin:
             # Find/Replace is transient from 1.0.2 onward; ignore legacy persisted visibility.
             self.show_search_bar = False
             saved_interface = preference_text(data, "interface", "ribbon", limit=16).lower()
-            if saved_interface in ("ribbon", "retro"):
+            if saved_interface in ("ribbon", "retro", "appmenu_only"):
                 self.interface_style = saved_interface
             self.workspace_layout = max(1, min(4, int(data.get("workspace_layout", 3))))
             saved_retro = data.get("retro_toolbar_items", list(RETRO_TOOLBAR_DEFAULT))
@@ -127,8 +127,7 @@ class EditorPreferencesMixin:
                 for item in saved_retro:
                     if isinstance(item,str) and item in RETRO_TOOLBAR_ALLOWED and item not in clean:
                         clean.append(item)
-                if clean:
-                    self.retro_toolbar_items = clean
+                self.retro_toolbar_items = clean
             saved_drop = data.get("drop_open_mode", "active_window")
             if saved_drop in ("active_window", "new_window"):
                 self.drop_open_mode = saved_drop
