@@ -4,7 +4,7 @@ umask 022
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd -P)"
-VERSION="2.0.0"
+VERSION="2.1.2"
 APP_NAME="RiqatonyPad"
 HOST_ARCH_RAW="$(uname -m)"
 case "$HOST_ARCH_RAW" in

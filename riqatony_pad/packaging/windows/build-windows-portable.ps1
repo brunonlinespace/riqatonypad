@@ -7,7 +7,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $AppName = "RiqatonyPad"
-$Version = "2.0.0"
+$ExecutableName = "riqatonypad"
+$Version = "2.1.2"
 $Architecture = "x64"
 
 if ([System.Environment]::OSVersion.Platform -ne [System.PlatformID]::Win32NT) {
@@ -16,8 +17,11 @@ if ([System.Environment]::OSVersion.Platform -ne [System.PlatformID]::Win32NT) {
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Root = (Resolve-Path (Join-Path $ScriptDir "..\..")).Path
+$ProjectRoot = (Resolve-Path (Join-Path $Root "..")).Path
 $SourceFile = Join-Path $Root "app.py"
 $EditorWidgets = Join-Path $Root "widgets/rwpyn/editor_widgets.py"
+$CharacterCount = Join-Path $Root "widgets/rwpyn/character_count.py"
+$MessageConventions = Join-Path $Root "widgets/message_conventions.py"
 $EditorFormatting = Join-Path $Root "widgets/rwpyn/editor_formatting.py"
 $EditorInsertion = Join-Path $Root "widgets/rwpyn/editor_insertion.py"
 $EditorSearchView = Join-Path $Root "widgets/rwpyn/editor_search_view.py"
@@ -37,6 +41,7 @@ $IconDir = Join-Path $Root "assets\icons"
 $RibbonIconDir = Join-Path $Root "assets\ribbon-icons"
 $ClassicRibbonIconDir = Join-Path $Root "assets\ribbon-icons-classic"
 $LegacyRibbonIconDir = Join-Path $Root "assets\ribbon-icons-original"
+$AeroRibbonIconDir = Join-Path $Root "assets\ribbon-icons-aero"
 $StyleDir = Join-Path $Root "assets\styles"
 $TemplateDir = Join-Path $Root "assets\templates"
 $DocsDir = Join-Path $Root "docs"
@@ -74,6 +79,8 @@ function Assert-File([string]$Path) {
 
 Assert-File $SourceFile
 Assert-File $EditorWidgets
+Assert-File $CharacterCount
+Assert-File $MessageConventions
 Assert-File $RtfCodec
 Assert-File $RichTextSupport
 Assert-File $RtfNewDocument
@@ -86,6 +93,9 @@ Assert-File (Join-Path $RibbonIconDir "light\subscript.png")
 Assert-File (Join-Path $RibbonIconDir "dark\subscript.png")
 Assert-File (Join-Path $ClassicRibbonIconDir "light\subscript.png")
 Assert-File (Join-Path $LegacyRibbonIconDir "light\subscript.png")
+Assert-File (Join-Path $AeroRibbonIconDir "light\subscript.png")
+Assert-File (Join-Path $AeroRibbonIconDir "dark\subscript.png")
+Assert-File (Join-Path $ProjectRoot "README.md")
 Assert-File $Requirements
 Assert-File $VersionInfo
 Assert-File (Join-Path $StyleDir "breeze-dark.qss")
@@ -112,13 +122,6 @@ if ($SourceText -notmatch $ExpectedVersionPattern) {
     )
 }
 
-$ApplicationPythonFiles = @(
-    Get-ChildItem -LiteralPath $Root -File -Filter *.py
-)
-if ($ApplicationPythonFiles.Count -ne 7) {
-    throw "Expected the seven RiqatonyPad runtime Python modules in the RiqatonyPad program directory."
-}
-
 Write-Step "Preparing isolated Python environment"
 if (Test-Path -LiteralPath $BuildRoot) {
     Remove-Item -LiteralPath $BuildRoot -Recurse -Force
@@ -140,7 +143,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "Could not install the Windows build requirements."
 }
 
-& $VenvPython -m py_compile $SourceFile $EditorWidgets $EditorFormatting $EditorInsertion $EditorSearchView $RtfCodec $RichTextSupport $RtfNewDocument $ShortcutSearch $EditorPlatformStartup
+& $VenvPython -m py_compile $SourceFile $EditorWidgets $CharacterCount $MessageConventions $EditorFormatting $EditorInsertion $EditorSearchView $RtfCodec $RichTextSupport $RtfNewDocument $ShortcutSearch $EditorPlatformStartup
 if ($LASTEXITCODE -ne 0) {
     throw "The canonical source failed Python syntax validation."
 }
@@ -163,10 +166,16 @@ Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
 
 Write-Step "Staging the canonical source and shared assets"
 New-Item -ItemType Directory -Path (Join-Path $Stage "widgets\rwpyn") -Force | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $Stage "riqatony_pad\widgets") -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $Root "widgets\__init__.py") -Destination (Join-Path $Stage "widgets\__init__.py")
 Copy-Item -LiteralPath (Join-Path $Root "widgets\rwpyn\__init__.py") -Destination (Join-Path $Stage "widgets\rwpyn\__init__.py")
 Copy-Item -LiteralPath $SourceFile -Destination (Join-Path $Stage "app.py")
 Copy-Item -LiteralPath $EditorWidgets -Destination (Join-Path $Stage "widgets/rwpyn/editor_widgets.py")
+Copy-Item -LiteralPath $CharacterCount -Destination (Join-Path $Stage "widgets/rwpyn/character_count.py")
+Copy-Item -LiteralPath $MessageConventions -Destination (Join-Path $Stage "widgets/message_conventions.py")
+New-Item -ItemType File -Path (Join-Path $Stage "riqatony_pad\__init__.py") -Force | Out-Null
+New-Item -ItemType File -Path (Join-Path $Stage "riqatony_pad\widgets\__init__.py") -Force | Out-Null
+Copy-Item -LiteralPath $MessageConventions -Destination (Join-Path $Stage "riqatony_pad/widgets/message_conventions.py")
 Copy-Item -LiteralPath $EditorFormatting -Destination (Join-Path $Stage "widgets/rwpyn/editor_formatting.py")
 Copy-Item -LiteralPath $EditorInsertion -Destination (Join-Path $Stage "widgets/rwpyn/editor_insertion.py")
 Copy-Item -LiteralPath $EditorSearchView -Destination (Join-Path $Stage "widgets/rwpyn/editor_search_view.py")
@@ -186,6 +195,7 @@ Copy-Item -LiteralPath $IconDir -Destination (Join-Path $Stage "icons") -Recurse
 Copy-Item -LiteralPath $RibbonIconDir -Destination (Join-Path $Stage "ribbon-icons") -Recurse
 Copy-Item -LiteralPath $ClassicRibbonIconDir -Destination (Join-Path $Stage "ribbon-icons-classic") -Recurse
 Copy-Item -LiteralPath $LegacyRibbonIconDir -Destination (Join-Path $Stage "ribbon-icons-original") -Recurse
+Copy-Item -LiteralPath $AeroRibbonIconDir -Destination (Join-Path $Stage "ribbon-icons-aero") -Recurse
 Copy-Item -LiteralPath $StyleDir -Destination (Join-Path $Stage "styles") -Recurse
 Copy-Item -LiteralPath $TemplateDir -Destination (Join-Path $Stage "templates") -Recurse
 New-Item -ItemType Directory -Force -Path (Join-Path $Stage "docs") | Out-Null
@@ -198,7 +208,9 @@ $PyInstallerArguments = @(
     "--windowed",
     "--onedir",
     "--optimize", "1",
-    "--name", $AppName,
+    "--name", $ExecutableName,
+    "--paths", $Stage,
+    "--hidden-import", "riqatony_pad.widgets.message_conventions",
     "--icon", $IconFile,
     "--version-file", $VersionInfo,
     "--distpath", $PyInstallerDist,
@@ -208,6 +220,7 @@ $PyInstallerArguments = @(
     "--add-data", "$Stage\ribbon-icons;ribbon-icons",
     "--add-data", "$Stage\ribbon-icons-classic;ribbon-icons-classic",
     "--add-data", "$Stage\ribbon-icons-original;ribbon-icons-original",
+    "--add-data", "$Stage\ribbon-icons-aero;ribbon-icons-aero",
     "--add-data", "$Stage\styles;styles",
     "--add-data", "$Stage\templates;templates",
     "--add-data", "$Stage\docs;docs",
@@ -227,35 +240,15 @@ if (Test-Path -LiteralPath $PackageDir) {
     Remove-Item -LiteralPath $PackageDir -Recurse -Force
 }
 New-Item -ItemType Directory -Path $PackageDir | Out-Null
-Copy-Item -Path (Join-Path $PyInstallerDist "$AppName\*") `
+Copy-Item -Path (Join-Path $PyInstallerDist "$ExecutableName\*") `
     -Destination $PackageDir -Recurse -Force
 
-$PackageDocs = Join-Path $PackageDir "docs"
-New-Item -ItemType Directory -Path $PackageDocs -Force | Out-Null
-Copy-Item -LiteralPath (Join-Path $Root "LICENSE") `
-    -Destination (Join-Path $PackageDocs "LICENSE")
-$DocumentationFiles = @(
-    "RiqatonyPad-Documentation.rtf",
-    "README.md",
-    "ARCHITECTURE.md",
-    "FEATURE_MATRIX.md",
-    "FORMAT_SUPPORT.md",
-    "KNOWN_LIMITATIONS.md",
-    "QA_TEST_PLAN.md",
-    "LICENSING_AND_PROVENANCE.md",
-    "PORT_AUDIT.md",
-    "CHANGELOG.md",
-    "RELEASE_NOTES.md",
-    "SECURITY_REVIEW.md"
-)
-foreach ($DocumentationFile in $DocumentationFiles) {
-    Copy-Item -LiteralPath (Join-Path $Root "docs\$DocumentationFile") `
-        -Destination (Join-Path $PackageDocs $DocumentationFile)
-}
+Copy-Item -LiteralPath (Join-Path $ProjectRoot "README.md") `
+    -Destination (Join-Path $PackageDir "README.md") -Force
 
 if (-not $SkipSmokeTest) {
     Write-Step "Running deterministic Windows smoke test"
-    $Executable = Join-Path $PackageDir "$AppName.exe"
+    $Executable = Join-Path $PackageDir "$ExecutableName.exe"
     $SmokeRoot = Join-Path $BuildRoot "smoke-profile"
     if (Test-Path -LiteralPath $SmokeRoot) {
         Remove-Item -LiteralPath $SmokeRoot -Recurse -Force
@@ -315,7 +308,6 @@ if ($LASTEXITCODE -ne 0) {
 $SourceHash = (Get-FileHash -LiteralPath $SourceFile -Algorithm SHA256).Hash.ToLowerInvariant()
 $CodecHash = (Get-FileHash -LiteralPath $RtfCodec -Algorithm SHA256).Hash.ToLowerInvariant()
 $RichSupportHash = (Get-FileHash -LiteralPath $RichTextSupport -Algorithm SHA256).Hash.ToLowerInvariant()
-$SourceEditorHash = (Get-FileHash -LiteralPath $SourceEditor -Algorithm SHA256).Hash.ToLowerInvariant()
 
 @"
 RiqatonyPad Windows build
@@ -329,10 +321,12 @@ $QtVersions
 RiqatonyPad source SHA-256: $SourceHash
 RTF codec SHA-256: $CodecHash
 Rich-text support SHA-256: $RichSupportHash
-Source editor SHA-256: $SourceEditorHash
 Output: $(Split-Path -Leaf $ZipFile)
 Output SHA-256: $Hash
 "@ | Set-Content -LiteralPath $BuildInfo -Encoding UTF8
+
+Write-Step "Cleaning temporary build workspace"
+Remove-Item -LiteralPath $BuildRoot -Recurse -Force
 
 Write-Step "Build complete"
 Write-Host $PackageDir

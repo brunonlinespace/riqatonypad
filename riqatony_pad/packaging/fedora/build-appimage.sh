@@ -10,7 +10,7 @@ umask 022
 
 APP_NAME="RiqatonyPad"
 APP_ID="riqatonypad"
-APP_VERSION="2.0.0"
+APP_VERSION="2.1.2"
 DESKTOP_ID="io.github.brunonlinespace.riqatonypad"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
