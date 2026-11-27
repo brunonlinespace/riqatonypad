@@ -68,9 +68,11 @@ class EditorRibbonRetroMixin:
     def _show_toolbar_context_menu(self, global_position):
         menu=QMenu(self)
         menu.addAction(self.layout_actions["ribbon"])
-        menu.addAction(self.layout_actions["retro"])
         menu.addSeparator()
+        menu.addAction(self.layout_actions["retro"])
         menu.addAction(self.retro_toolbar_action)
+        menu.addSeparator()
+        menu.addAction(self.layout_actions["appmenu_only"])
         menu.exec(global_position)
 
 
@@ -352,6 +354,20 @@ class EditorRibbonRetroMixin:
             if item_id=="symbols":
                 self.retro_symbols_button=button
             self.retro_toolbar_widgets.append(button)
+        if self.retro_toolbar_items:
+            separator=QFrame(self.retro_toolbar_body)
+            separator.setFrameShape(QFrame.Shape.VLine); separator.setFrameShadow(QFrame.Shadow.Sunken)
+            separator.setFixedHeight(RIBBON_BUTTON_SIZE-8)
+            self.retro_toolbar_layout.addWidget(separator)
+        settings_button=QToolButton(self.retro_toolbar_body)
+        settings_button.setDefaultAction(self.retro_toolbar_action)
+        settings_tooltip=self._toolbar_action_tooltip(self.retro_toolbar_action,"Retro Settings")
+        self.retro_toolbar_action.setToolTip(settings_tooltip); settings_button.setToolTip(settings_tooltip)
+        self._normalise_retro_button(settings_button,"Retro Settings",settings_tooltip)
+        settings_button.setIcon(self.custom_icon("toolbar-classic")); self.retro_icon_bindings.append((settings_button,"toolbar-classic"))
+        settings_button.setProperty("riqatonypad_instant_tooltip",True); settings_button.installEventFilter(self)
+        self.retro_toolbar_layout.addWidget(settings_button); self.retro_toolbar_widgets.append(settings_button)
+        self.retro_settings_button=settings_button
         self.retro_toolbar_layout.activate()
         self.retro_toolbar_body.adjustSize()
         QTimer.singleShot(0, self._refresh_interface_geometry)
@@ -540,9 +556,9 @@ class EditorRibbonRetroMixin:
             return
         widgets=(self.ribbon_tabs,self.retro_toolbar,self.search_container,self.external_banner,self.visual_editor)
         for widget in widgets: self.main_layout.removeWidget(widget)
-        interface=(self.retro_toolbar if self.interface_style=="retro" else self.ribbon_tabs)
-        inactive=(self.ribbon_tabs if self.interface_style=="retro" else self.retro_toolbar)
-        inactive.setVisible(False); interface.setVisible(True)
+        interface=None if self.interface_style=="appmenu_only" else (self.retro_toolbar if self.interface_style=="retro" else self.ribbon_tabs)
+        self.ribbon_tabs.setVisible(self.interface_style=="ribbon")
+        self.retro_toolbar.setVisible(self.interface_style=="retro")
 
         def add_editor_block():
             # Keep the external-change warning structurally attached to the editor,
@@ -552,33 +568,38 @@ class EditorRibbonRetroMixin:
             self.main_layout.addWidget(self.visual_editor,1)
 
         if self.workspace_layout==1:
-            self.main_layout.addWidget(interface); self.main_layout.addWidget(self.search_container); add_editor_block()
+            if interface is not None: self.main_layout.addWidget(interface)
+            self.main_layout.addWidget(self.search_container); add_editor_block()
         elif self.workspace_layout==2:
-            add_editor_block(); self.main_layout.addWidget(self.search_container); self.main_layout.addWidget(interface)
+            add_editor_block(); self.main_layout.addWidget(self.search_container)
+            if interface is not None: self.main_layout.addWidget(interface)
         elif self.workspace_layout==3:
-            self.main_layout.addWidget(interface); add_editor_block(); self.main_layout.addWidget(self.search_container)
+            if interface is not None: self.main_layout.addWidget(interface)
+            add_editor_block(); self.main_layout.addWidget(self.search_container)
         else:
-            self.main_layout.addWidget(self.search_container); add_editor_block(); self.main_layout.addWidget(interface)
+            self.main_layout.addWidget(self.search_container); add_editor_block()
+            if interface is not None: self.main_layout.addWidget(interface)
         self.search_container.setVisible(self.show_search_bar)
         self.external_banner.setVisible(bool(self._external_change_pending))
 
 
     def set_interface_style(self, style, persist=True):
-        """Switch between Ribbon and Retro without moving the Find bar."""
+        """Switch Ribbon, Retro or Disabled (AppMenu only) without moving Find."""
         style = str(style).lower()
-        if style not in ("ribbon", "retro"):
+        if style not in ("ribbon", "retro", "appmenu_only"):
             style = "ribbon"
         self.interface_style = style
+        is_ribbon = style == "ribbon"
         is_retro = style == "retro"
         if hasattr(self, "ribbon_tabs"):
-            self.ribbon_tabs.setVisible(not is_retro)
+            self.ribbon_tabs.setVisible(is_ribbon)
         if hasattr(self, "retro_toolbar"):
             self.retro_toolbar.setVisible(is_retro)
         if hasattr(self, "app_menu_bar"):
-            # Retro participates in the platform-native menu system. On Plasma
-            # this allows Menu Only / Global Menu to export the menu normally.
+            # Match MaqaronyPad: Ribbon hides the local AppMenu, while Retro and
+            # Disabled (AppMenu only) keep the native application menu visible.
             self.app_menu_bar.setNativeMenuBar(True)
-            self.app_menu_bar.setVisible(is_retro)
+            self.app_menu_bar.setVisible(not is_ribbon)
         for mode, action in getattr(self, "layout_actions", {}).items():
             action.blockSignals(True)
             action.setChecked(mode == style)
@@ -587,19 +608,22 @@ class EditorRibbonRetroMixin:
             self.apply_workspace_layout()
         if persist:
             self.save_preferences()
-        self._show_status_message(
-            "Retro interface enabled." if is_retro else "Ribbon interface enabled.", 2000
-        )
+        message={
+            "ribbon":"Ribbon interface enabled.",
+            "retro":"Retro interface enabled.",
+            "appmenu_only":"Editor toolbar disabled; AppMenu only.",
+        }[style]
+        self._show_status_message(message,2000)
 
 
     def show_retro_toolbar_dialog(self):
         dialog = QDialog(self)
-        dialog.setWindowTitle("Customise Retro Bar — RiqatonyPad")
+        dialog.setWindowTitle("Retro Settings — RiqatonyPad")
         dialog.resize(560, 620)
         outer = QVBoxLayout(dialog)
         intro = QLabel(
-            "Tick the controls you want on the Retro bar. All commands remain "
-            "available from the application menus regardless of toolbar selection.",
+            "Tick the optional controls you want on the Retro toolbar. Retro Settings remains "
+            "available on Retro at all times; all commands remain available from the application menus.",
             dialog,
         )
         intro.setWordWrap(True)
@@ -625,8 +649,9 @@ class EditorRibbonRetroMixin:
         scroll.setWidget(body)
         outer.addWidget(scroll, 1)
         controls = QHBoxLayout()
+        clear_button = QPushButton("Clear All", dialog)
         default_button = QPushButton("Default", dialog)
-        controls.addWidget(default_button)
+        controls.addWidget(clear_button); controls.addWidget(default_button)
         controls.addStretch(1)
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel,
@@ -634,6 +659,10 @@ class EditorRibbonRetroMixin:
         )
         controls.addWidget(buttons)
         outer.addLayout(controls)
+
+        def clear_all():
+            for check in checks.values():
+                check.setChecked(False)
 
         def restore_default():
             defaults = set(RETRO_TOOLBAR_DEFAULT)
@@ -649,6 +678,7 @@ class EditorRibbonRetroMixin:
             self.save_preferences()
             dialog.accept()
 
+        clear_button.clicked.connect(clear_all)
         default_button.clicked.connect(restore_default)
         buttons.accepted.connect(save_selection)
         buttons.rejected.connect(dialog.reject)

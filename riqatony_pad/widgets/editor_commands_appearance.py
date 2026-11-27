@@ -19,10 +19,11 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import weakref
 from pathlib import Path
 
 from PyQt6.QtCore import (
-    QBuffer, QByteArray, QDateTime, QEvent, QFileSystemWatcher, QIODevice, QLocale, QMimeData, QRect, QRectF,
+    QBuffer, QByteArray, QDateTime, QEvent, QFileSystemWatcher, QIODevice, QLocale, QMimeData, QObject, QRect, QRectF,
     QRegularExpression, QSize, QSizeF, Qt, QTimer, QUrl,
 )
 from PyQt6.QtGui import (
@@ -222,6 +223,151 @@ RETRO_TOOLBAR_ALLOWED = {spec[1] for spec in COMMAND_SURFACE_SPECS}
 
 
 
+def _theme_palette_matches(application, theme):
+    """Return whether RiqatonyPad's explicit Dark/Light palette is still intact."""
+    if theme not in ("light", "dark"):
+        return True
+    expected = {
+        "light": {
+            QPalette.ColorRole.Window: "#D4D4D4",
+            QPalette.ColorRole.WindowText: "#2A2A2A",
+            QPalette.ColorRole.Base: "#F4F4F4",
+            QPalette.ColorRole.Button: "#E4E4E4",
+            QPalette.ColorRole.Highlight: "#B24A3B",
+        },
+        "dark": {
+            QPalette.ColorRole.Window: "#202326",
+            QPalette.ColorRole.WindowText: "#F1F3F4",
+            QPalette.ColorRole.Base: "#151719",
+            QPalette.ColorRole.Button: "#292D31",
+            QPalette.ColorRole.Highlight: "#B24A3B",
+        },
+    }[theme]
+    palette = application.palette()
+    for role, colour in expected.items():
+        if palette.color(role) != QColor(colour):
+            return False
+    try:
+        if palette.color(QPalette.ColorRole.Accent) != QColor("#B24A3B"):
+            return False
+    except AttributeError:
+        pass
+    return True
+
+
+class AppearanceThemeGuard(QObject):
+    """Reassert RiqatonyPad's selected theme while staying inert during Qt shutdown."""
+
+    def __init__(self, window):
+        super().__init__(window)
+        self._window_ref = weakref.ref(window)
+        self._queued = False
+        self._applying = False
+        self._force = False
+        self._active = True
+        self._scheme_signal_connected = False
+        self._restore_timer = QTimer(self)
+        self._restore_timer.setSingleShot(True)
+        self._restore_timer.setInterval(0)
+        self._restore_timer.timeout.connect(self._restore)
+
+        application = QApplication.instance()
+        if application is None:
+            self._active = False
+            return
+        application.installEventFilter(self)
+        application.aboutToQuit.connect(self.shutdown)
+        hints = application.styleHints()
+        if hasattr(hints, "colorSchemeChanged"):
+            hints.colorSchemeChanged.connect(self._system_scheme_changed)
+            self._scheme_signal_connected = True
+
+    def _window(self):
+        return self._window_ref() if self._window_ref is not None else None
+
+    def _system_scheme_changed(self, *_args):
+        if self._active:
+            self._schedule(force=True)
+
+    def eventFilter(self, watched, event):  # noqa: N802
+        if not self._active:
+            return False
+        window = self._window()
+        application = QApplication.instance()
+        if window is None or application is None:
+            return False
+        if (watched is window or watched is application) and event.type() in (
+            QEvent.Type.PaletteChange,
+            QEvent.Type.ApplicationPaletteChange,
+            QEvent.Type.StyleChange,
+        ):
+            self._schedule()
+        return False
+
+    def _schedule(self, force=False):
+        if not self._active or self._applying:
+            return
+        window = self._window()
+        application = QApplication.instance()
+        if window is None or application is None:
+            return
+        selected = window.effective_appimage_theme()
+        if selected != "system" and not force and _theme_palette_matches(application, selected):
+            return
+        self._force |= force
+        if not self._queued:
+            self._queued = True
+            self._restore_timer.start()
+
+    def _restore(self):
+        if not self._active:
+            return
+        self._queued = False
+        force = self._force
+        self._force = False
+        if self._applying:
+            return
+        window = self._window()
+        application = QApplication.instance()
+        if window is None or application is None:
+            return
+        selected = window.effective_appimage_theme()
+        if selected != "system" and not force and _theme_palette_matches(application, selected):
+            return
+        self._applying = True
+        try:
+            window.apply_appimage_theme(selected)
+        finally:
+            self._applying = False
+
+    def shutdown(self):
+        """Detach from QApplication before SIP starts destroying Qt wrappers."""
+        if not self._active:
+            return
+        self._active = False
+        self._queued = False
+        self._force = False
+        self._restore_timer.stop()
+
+        application = QApplication.instance()
+        if application is not None:
+            try:
+                application.removeEventFilter(self)
+            except RuntimeError:
+                pass
+            if self._scheme_signal_connected:
+                try:
+                    application.styleHints().colorSchemeChanged.disconnect(self._system_scheme_changed)
+                except (AttributeError, RuntimeError, TypeError):
+                    pass
+            try:
+                application.aboutToQuit.disconnect(self.shutdown)
+            except (RuntimeError, TypeError):
+                pass
+        self._scheme_signal_connected = False
+        self._window_ref = None
+
+
 class EditorCommandsAppearanceMixin:
 
     def command_surface_catalog(self):
@@ -365,12 +511,17 @@ class EditorCommandsAppearanceMixin:
             action=QAction(label,self,checkable=True); action.setShortcut(QKeySequence(shortcut)); action.triggered.connect(lambda _checked=False,selected=mode:self.set_workspace_layout(selected)); self.workspace_layout_group.addAction(action); self.layout_menu.addAction(action); self.addAction(action); self.workspace_layout_actions[mode]=action
         self.interface_menu=menu.addMenu("Editor Toolbar")
         self.layout_group=QActionGroup(self); self.layout_group.setExclusive(True); self.layout_actions={}
-        for mode,label in (("ribbon","Ribbon (default)"),("retro","Retro")):
-            action=QAction(label,self,checkable=True); action.triggered.connect(lambda _checked=False,selected=mode:self.set_interface_style(selected)); self.layout_group.addAction(action); self.interface_menu.addAction(action); self.addAction(action); self.layout_actions[mode]=action
-            self.bind_custom_icon(action,"toolbar-tabbed" if mode=="ribbon" else "toolbar-classic")
+        for mode,label,icon in (("ribbon","Ribbon (default)","toolbar-tabbed"),("retro","Retro","toolbar-classic"),("appmenu_only","Disabled (AppMenu only)",None)):
+            action=QAction(label,self,checkable=True); action.triggered.connect(lambda _checked=False,selected=mode:self.set_interface_style(selected)); self.layout_group.addAction(action); self.addAction(action); self.layout_actions[mode]=action
+            if icon: self.bind_custom_icon(action,icon)
+        self.interface_menu.addAction(self.layout_actions["ribbon"])
+        self.interface_menu.addSeparator()
+        self.interface_menu.addAction(self.layout_actions["retro"])
+        self.retro_toolbar_action=self.add_menu_action(self.interface_menu,"Retro Settings…",self.show_retro_toolbar_dialog)
+        self.bind_custom_icon(self.retro_toolbar_action,"toolbar-classic")
+        self.interface_menu.addSeparator()
+        self.interface_menu.addAction(self.layout_actions["appmenu_only"])
         self.toggle_interface_style_action=QAction("Toggle Ribbon/Retro",self); self.toggle_interface_style_action.setShortcut(QKeySequence("Ctrl+Alt+Shift+T")); self.toggle_interface_style_action.triggered.connect(lambda _checked=False:self.set_interface_style("retro" if self.interface_style=="ribbon" else "ribbon")); self.addAction(self.toggle_interface_style_action)
-        self.retro_toolbar_separator=self.interface_menu.addSeparator()
-        self.retro_toolbar_action=self.add_menu_action(self.interface_menu,"Customise Retro Bar…",self.show_retro_toolbar_dialog)
         menu.addSeparator()
         zoom_menu=menu.addMenu("Editor Zoom")
         self.zoom_in_action=self.add_menu_action(zoom_menu,"Zoom In",self.zoom_in,QKeySequence.StandardKey.ZoomIn)
@@ -608,6 +759,28 @@ class EditorCommandsAppearanceMixin:
         """Return the explicit launch override or saved AppImage System/Dark/Light choice."""
         return self.appimage_theme_override or self.appimage_theme
 
+    def _system_theme_variant(self, application):
+        """Resolve the host light/dark preference, with Windows as the primary target."""
+        if sys.platform == "win32":
+            try:
+                import winreg
+                key_path = r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path) as key:
+                    value, _kind = winreg.QueryValueEx(key, "AppsUseLightTheme")
+                return "light" if int(value) else "dark"
+            except (OSError, TypeError, ValueError):
+                pass
+        try:
+            scheme = application.styleHints().colorScheme()
+            if scheme == Qt.ColorScheme.Dark:
+                return "dark"
+            if scheme == Qt.ColorScheme.Light:
+                return "light"
+        except (AttributeError, RuntimeError):
+            pass
+        colour = application.style().standardPalette().color(QPalette.ColorRole.Window)
+        return "dark" if colour.lightness() < 128 else "light"
+
     def _portable_markopad_palette(self, theme):
         """Return Markopad's exact Portable Dark/Light palette with Rico brick accent."""
         palette=QPalette()
@@ -622,6 +795,10 @@ class EditorCommandsAppearanceMixin:
             palette.setColor(QPalette.ColorRole.Button,QColor("#292D31"))
             palette.setColor(QPalette.ColorRole.ButtonText,QColor("#F1F3F4"))
             palette.setColor(QPalette.ColorRole.Highlight,QColor("#B24A3B"))
+            try:
+                palette.setColor(QPalette.ColorRole.Accent,QColor("#B24A3B"))
+            except AttributeError:
+                pass
             palette.setColor(QPalette.ColorRole.HighlightedText,QColor("#FFFFFF"))
             palette.setColor(QPalette.ColorRole.PlaceholderText,QColor("#8E969E"))
         else:
@@ -642,6 +819,10 @@ class EditorCommandsAppearanceMixin:
             palette.setColor(QPalette.ColorRole.Dark,QColor("#767676"))
             palette.setColor(QPalette.ColorRole.Shadow,QColor("#545454"))
             palette.setColor(QPalette.ColorRole.Highlight,QColor("#B24A3B"))
+            try:
+                palette.setColor(QPalette.ColorRole.Accent,QColor("#B24A3B"))
+            except AttributeError:
+                pass
             palette.setColor(QPalette.ColorRole.HighlightedText,QColor("#FFFFFF"))
             palette.setColor(QPalette.ColorRole.PlaceholderText,QColor("#767676"))
             palette.setColor(QPalette.ColorRole.Link,QColor("#0068A6"))
@@ -719,13 +900,31 @@ class EditorCommandsAppearanceMixin:
         application=QApplication.instance()
         if application is None:
             return
-        # Markopad's exact implementation in every runtime: keep the active Qt
-        # style, remove application QSS, reset to that style's standard palette,
-        # then apply only the Dark/Light palette. Rico changes only the accent.
+
+        # Follow MaqaronyPad's platform split exactly. System remains native;
+        # Windows alone needs an explicit Qt colour-scheme correction because
+        # frozen Qt applications do not always follow AppsUseLightTheme.
         application.setStyleSheet("")
-        application.setPalette(application.style().standardPalette())
-        if theme in ("dark","light"):
+        hints=application.styleHints()
+        if theme == "system":
+            try:
+                if sys.platform == "win32":
+                    resolved=self._system_theme_variant(application)
+                    hints.setColorScheme(Qt.ColorScheme.Dark if resolved == "dark" else Qt.ColorScheme.Light)
+                else:
+                    hints.unsetColorScheme()
+            except (AttributeError,RuntimeError):
+                pass
+            application.setPalette(QPalette())
+        else:
+            if sys.platform == "win32":
+                try:
+                    hints.setColorScheme(Qt.ColorScheme.Dark if theme == "dark" else Qt.ColorScheme.Light)
+                except (AttributeError,RuntimeError):
+                    pass
+            application.setPalette(application.style().standardPalette())
             application.setPalette(self._portable_markopad_palette(theme))
+
         if update_actions:
             for window in tuple(OPEN_WINDOWS):
                 for selected,action in getattr(window,"appimage_theme_actions",{}).items():
