@@ -1,4 +1,4 @@
-# RiqatonyPad 1.1.2 interfaces and layouts
+# RiqatonyPad 2.1.2 interfaces and layouts
 
 ## View AppMenu
 
@@ -12,7 +12,7 @@ Current order:
 6. separator
 7. Locked Mode
 8. Editor Layout → Toolbar Top / Find Bottom / Toolbar Top / Find Top / Toolbar Bottom / Find Top / Toolbar Bottom / Find Bottom
-9. Editor Toolbar → Ribbon (default) / Retro / separator / Customise Retro Bar…
+9. Editor Toolbar → Ribbon (default) / separator / Retro / Retro Settings… / separator / Disabled (AppMenu only)
 10. separator
 11. Editor Zoom → Zoom In / Zoom Out / separator / Reset Zoom
 12. Editor Miscellaneous → Tab Width… / New Document Defaults…
@@ -41,7 +41,7 @@ Ribbon pages remain horizontally scrollable/QScroller-enabled. Ribbon and Retro 
 
 ## Retro Bar
 
-Retro uses the same `COMMAND_SURFACE_SPECS` inventory as Ribbon. **Customise Retro Bar…** exposes every applicable action, selector and menu-backed control from that shared inventory; the two interfaces differ only in presentation and chosen layout. Menu-backed controls open the same menus used by Ribbon/AppMenu, so checked state and preferences cannot drift between surfaces.
+Retro uses the same `COMMAND_SURFACE_SPECS` inventory as Ribbon. **Retro Settings…** exposes every optional applicable action, selector and menu-backed control from that shared inventory; the two interfaces differ only in presentation and chosen layout. Retro Settings itself is permanent and remains as the final Retro control even after Clear All. **Disabled (AppMenu only)** hides Ribbon and Retro while preserving the AppMenu. Menu-backed controls open the same menus used by Ribbon/AppMenu, so checked state and preferences cannot drift between surfaces.
 
 Default Retro row:
 

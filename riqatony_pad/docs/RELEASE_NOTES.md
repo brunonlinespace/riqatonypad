@@ -1,3 +1,27 @@
+## RiqatonyPad 2.1.2 — appearance-guard shutdown correction (2026-11-27)
+
+RiqatonyPad 2.1.2 is a surgical lifecycle correction to the 2.1.1 live appearance guard. The guard now uses an owned single-shot timer, a weak window reference, and explicit `aboutToQuit` cleanup that stops pending restoration, removes the application event filter, and disconnects appearance and quit signals before QApplication/SIP teardown. Theme behavior, palettes, RTF/editor behavior, toolbar geometry, AppMenu behavior and packaging remain unchanged from 2.1.1.
+
+## RiqatonyPad 2.1.1 — live theme and Windows packaging correction (2026-11-27)
+
+RiqatonyPad 2.1.1 corrects the remaining application-shell issues found during Windows testing of 2.1.0. Theme handling now follows the Windows-tested MaqaronyPad 1.1.6 model: System remains platform-native, Windows alone aligns Qt with the `AppsUseLightTheme` preference, and a deferred `AppearanceThemeGuard` restores the selected theme when the host palette, application palette, style, or colour scheme changes while RiqatonyPad is already open. Explicit Dark/Light continue to use the established native palette model with the Rico brick accent. The RTF/editor engine is unchanged.
+
+The bundled RTF documentation keeps its refreshed 2.1.0 content and shortcut table but restores the established brick-red document/section headings. The Windows packaging README is expanded to the same practical standard as the Nuxpad Windows guide, adapted to RiqatonyPad's actual builder. After a successful Windows build, the temporary `packaging/windows/build` workspace is removed; failed builds retain it for diagnosis. The flat portable layout, lowercase `riqatonypad.exe`, internal documentation, Halcyon staging, AppMenu-only mode, and permanent Retro Settings behavior from 2.1.0 are retained.
+
+## RiqatonyPad 2.1.0 — Windows/theme/interface documentation alignment (2026-11-26)
+
+RiqatonyPad 2.1.0 builds on the successfully tested 2.0.2 Windows portable runtime and aligns the remaining packaged experience with the current application. Windows System theme detection follows the Windows AppsUseLightTheme preference before Qt/desktop fallbacks; Dark and Light retain the established native Qt palette implementation with the Rico brick accent. The Windows frozen payload now includes the Halcyon icon family. The visible Windows portable folder contains `riqatonypad.exe`, `_internal/`, and the root `README.md` directly, with no exposed `docs/` folder; the bundled RTF documentation remains internal for the Help command.
+
+The Editor Toolbar menu now mirrors the established MaqaronyPad model: Ribbon (default), Retro, Retro Settings…, and Disabled (AppMenu only). Retro Settings includes Clear All and Default, while the Retro Settings control itself remains permanently available at the end of Retro so the toolbar can always be recovered. The root README gains current Windows portable instructions, and the bundled RTF documentation is refreshed for current behavior with its shortcut selection presented as a table. No RTF codec, rich-text support, new-document engine, document-formatting, or file-lifecycle behavior is changed.
+
+## RiqatonyPad 2.0.2 — Windows portable runtime-staging correction (2026-11-26)
+
+RiqatonyPad 2.0.2 is a narrow Windows-packaging correction on top of 2.0.1. The Windows portable builder now stages the existing `widgets.rwpyn.character_count` runtime module and the existing `riqatony_pad.widgets.message_conventions` compatibility import in the same manner already used by the Fedora/AppImage builder, so the PyInstaller executable can actually start and complete its smoke test. The emitted executable filename is now lowercase `riqatonypad.exe`. The stale undefined `$SourceEditor` build-record hash is removed so a successful smoke test can proceed through final ZIP/build-record creation. No editor, RTF, widget, theme, icon, file-lifecycle, dependency or document behavior is changed.
+
+## RiqatonyPad 2.0.1 — Windows portable builder correction (2026-11-26)
+
+RiqatonyPad 2.0.1 is a narrow packaging-only correction. The Windows portable builder no longer rejects the current modular source tree because it contains five top-level Python modules rather than the obsolete expected count of seven. The builder continues to validate its explicit required runtime files and stage the existing nested widget modules normally. Application/editor behavior is unchanged from 2.0.0.
+
 ## RiqatonyPad 2.0.0 — Final version promotion (2026-11-01)
 
 Promote the existing 2.0.0-x16.9 source baseline to final **2.0.0** without introducing editor functionality, RTF codec, icon-artwork, file-safety or build-workflow changes. Update the source application version, Suite component identity, AppImage and Windows packaging versions, and release QA version assertions. The GitHub-root README changes only its approved current-release field; its pinned independent authority remains intact.
