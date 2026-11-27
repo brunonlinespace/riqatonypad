@@ -10,7 +10,7 @@
     "main.py"
   ],
   "icon": "riqatony_pad/assets/icons/riqatonypad.png",
-  "version": "2.0.0",
+  "version": "2.1.2",
   "publisher": "brunonlinespace",
   "repository": "https://github.com/brunonlinespace/riqatonypad",
   "desktop_id": "riqatonypad",

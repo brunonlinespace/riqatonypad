@@ -14,7 +14,7 @@
 
 RiqatonyPad is a standalone Rich Text Format editor focused on fast, standards-based rich-text editing with a full Ribbon interface, an optional compact Retro command bar, strong file-safety behavior, and ordinary `.rtf` files that remain usable outside the application.
 
-Current release: **2.0.0**
+Current release: **2.1.2**
 
 Repository: <https://github.com/brunonlinespace/riqatonypad>
 
@@ -28,7 +28,7 @@ The application combines a touch-friendly Ribbon with an optional Retro command 
 
 - Standards-based **Rich Text Format editing** with no private document format.
 - Full-width **Ribbon** with File, Home, Insert, Configure, and Help pages.
-- Optional **Retro** interface using the same command inventory in one configurable horizontal command row.
+- Optional **Retro** interface using the same command inventory in one configurable horizontal command row, plus **Disabled (AppMenu only)** when no toolbar is wanted.
 - Four persistent **Editor Layout** arrangements for toolbar and Find/Replace placement.
 - Unified **Find / Replace** panel with live search, gold result highlighting, next/previous navigation, bounded replacement, and match counts.
 - Persistent **Locked Mode** for protecting documents from accidental editing while preserving navigation, selection, copying, and search.
@@ -60,9 +60,9 @@ Hover over a Ribbon command to see its name and keyboard shortcut. Ribbon comman
 
 **Retro** presents the same shared RiqatonyPad command inventory in one horizontally scrollable 52×52 row.
 
-Use **View → Editor Toolbar → Retro** or `Ctrl+Alt+Shift+T` to switch between Ribbon and Retro. **Customise Retro Bar…** lets you choose which applicable commands and selectors appear in the Retro row.
+Use **View → Editor Toolbar** to choose **Ribbon (default)**, **Retro**, **Retro Settings…**, or **Disabled (AppMenu only)**. `Ctrl+Alt+Shift+T` toggles between Ribbon and Retro. **Retro Settings…** lets you choose the optional commands and selectors shown in the Retro row, includes **Clear All** and **Default**, and remains permanently available as the final Retro control so the toolbar can always be reconfigured.
 
-Changing between Ribbon and Retro does not change the selected Editor Layout or move the Find/Replace panel independently.
+**Disabled (AppMenu only)** hides both Ribbon and Retro while keeping the AppMenu available. Changing toolbar mode does not change the selected Editor Layout or move the Find/Replace panel independently.
 
 ### AppMenu
 
@@ -136,7 +136,7 @@ The window title identifies Locked Mode when it is active.
 
 ## Appearance
 
-Choose **System**, **Dark**, or **Light** for the application shell. A fresh installation defaults to Light. The editor canvas can be controlled independently through **Dark Editor**.
+Choose **System**, **Dark**, or **Light** for the application shell. A fresh installation defaults to Light. On Windows, **System** follows the Windows app light/dark preference; on Linux and other platforms System remains native to Qt and the desktop environment. The editor canvas can be controlled independently through **Dark Editor**.
 
 Both Ribbon and Retro use the same packaged light/dark command-icon families, 144 icons per variant. Command buttons use the established 52×52 geometry with 36×36 icons:
 
@@ -212,10 +212,10 @@ The Fedora AppImage builder is included in the source tree:
 Expected outputs include:
 
 ```text
-riqatony_pad/dist/RiqatonyPad-2.0.0-x86_64.AppImage
-riqatony_pad/dist/RiqatonyPad-2.0.0-x86_64.AppImage.sha256
-riqatony_pad/dist/RiqatonyPad-2.0.0-x86_64.build-info.txt
-riqatony_pad/dist/RiqatonyPad-2.0.0-x86_64.build-python-lock.txt
+riqatony_pad/dist/RiqatonyPad-2.1.1-x86_64.AppImage
+riqatony_pad/dist/RiqatonyPad-2.1.1-x86_64.AppImage.sha256
+riqatony_pad/dist/RiqatonyPad-2.1.1-x86_64.build-info.txt
+riqatony_pad/dist/RiqatonyPad-2.1.1-x86_64.build-python-lock.txt
 ```
 
 The builder supports native `x86_64` and `aarch64` Fedora hosts. Run it as the normal desktop user; it is deliberately non-privileged and reports missing host prerequisites instead of installing system packages itself.
@@ -225,6 +225,27 @@ A completed AppImage can be rechecked with:
 ```bash
 ./riqatony_pad/packaging/fedora/test-appimage.sh
 ```
+
+## Building the Windows portable application
+
+On Windows, run:
+
+```powershell
+.\riqatony_pad\packaging\windows\build-windows-portable.ps1
+```
+
+The builder creates an isolated Python environment, runs the retained Qt-backed RTF QA, freezes RiqatonyPad with PyInstaller in one-directory portable form, runs the packaged smoke test, and writes the portable ZIP and build records under `riqatony_pad\dist`.
+
+The visible portable folder is deliberately flat at the application level:
+
+```text
+RiqatonyPad-2.1.1-Windows-x64-portable/
+├── _internal/
+├── riqatonypad.exe
+└── README.md
+```
+
+The bundled RTF documentation and application assets remain inside the frozen runtime where RiqatonyPad needs them; the portable folder does not expose a separate `docs` directory. The Windows build includes all four Riqa command-icon families, including **Halcyon**.
 
 ## Validation
 
