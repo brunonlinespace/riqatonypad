@@ -30,7 +30,7 @@ for fragment in (
     '<b>Ctrl+F</b> opens the Find/Replace panel', '<b>Ctrl+H</b> focuses Replace',
     '<b>F3</b> for the next result', '<b>Shift+F3</b>', 'Editor Layout',
     'Locked Mode protects a document', 'Ctrl+mouse-wheel zooms the document',
-    'Choose <b>Ribbon</b> or <b>Retro</b>', 'Customise Retro Bar…',
+    'Choose <b>Ribbon</b>, <b>Retro</b>, or <b>Disabled (AppMenu only)</b>', 'Retro Settings…',
     'New Document Defaults controls the exact font', 'Use <b>F1</b> for the bundled RTF Documentation',
 ): req(fragment in source,f'current Quick Tour content missing: {fragment}')
 # Protect unrelated core modules exactly.

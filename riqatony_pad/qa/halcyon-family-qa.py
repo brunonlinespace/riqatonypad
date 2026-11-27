@@ -32,3 +32,8 @@ for expected in ('AERO_RIBBON_ICON_DIR=', '${AERO_RIBBON_ICON_DIR}/light',
                  '--add-data "${SOURCE_STAGE}/ribbon-icons-aero:ribbon-icons-aero"'):
     assert expected in builder,expected
 print('PASS Halcyon included in frozen AppImage source payload')
+
+windows=(root/'packaging/windows/build-windows-portable.ps1').read_text()
+for expected in ('$AeroRibbonIconDir', 'ribbon-icons-aero', '"--add-data", "$Stage\\ribbon-icons-aero;ribbon-icons-aero"'):
+    assert expected in windows, expected
+print('PASS Halcyon included in frozen Windows source payload')

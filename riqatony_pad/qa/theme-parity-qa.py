@@ -35,3 +35,16 @@ assert 'self.editor_canvas_theme = saved_canvas' in source
 # This phase does not expand icon families or rewrite editor/RTF mechanics.
 assert 'for icon_set,label in (("new","Riqa Icons Harmony"),("classic","Riqa Icons Humility"),("original","Riqa Icons Heritage"),("aero","Riqa Icons Halcyon")):' in source
 print("PASS: RiqatonyPad 0.8.3 Phase 1C Light-theme parity")
+
+appearance=(ROOT/'widgets/editor_commands_appearance.py').read_text(encoding='utf-8')
+for fragment in (
+    'AppsUseLightTheme',
+    'winreg.HKEY_CURRENT_USER',
+    'if sys.platform == "win32":',
+    'hints.setColorScheme(Qt.ColorScheme.Dark if resolved == "dark" else Qt.ColorScheme.Light)',
+    'hints.unsetColorScheme()',
+    'application.setPalette(QPalette())',
+    'palette.setColor(QPalette.ColorRole.Accent,QColor("#B24A3B"))',
+):
+    assert fragment in appearance, fragment
+print("PASS: System theme keeps MaqaronyPad platform split with Rico explicit palettes")

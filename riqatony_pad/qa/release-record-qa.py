@@ -6,7 +6,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 ROOT=Path(__file__).resolve().parents[1]
 OUTER=ROOT.parent
-VERSION="2.0.0"
+VERSION="2.1.2"
 source=(ROOT/'app.py').read_text(encoding='utf-8')
 readme=(OUTER/'README.md').read_text(encoding='utf-8')
 notes=(ROOT/'docs'/'RELEASE_NOTES.md').read_text(encoding='utf-8')
@@ -15,6 +15,7 @@ manifest=json.loads((OUTER/'suite-pythoine-component.json').read_text(encoding='
 appimage=(ROOT/'packaging'/'fedora'/'build-appimage.sh').read_text(encoding='utf-8')
 appimage_test=(ROOT/'packaging'/'fedora'/'test-appimage.sh').read_text(encoding='utf-8')
 windows=(ROOT/'packaging'/'windows'/'build-windows-portable.ps1').read_text(encoding='utf-8')
+windows_readme=(ROOT/'packaging'/'windows'/'README.md').read_text(encoding='utf-8')
 version_info=(ROOT/'packaging'/'windows'/'windows-version-info.txt').read_text(encoding='utf-8')
 meta=ET.parse(ROOT/'packaging'/'appimage'/'io.github.brunonlinespace.riqatonypad.metainfo.xml').getroot()
 assert f'APP_VERSION = "{VERSION}"' in source
@@ -22,15 +23,17 @@ assert manifest.get('version')==VERSION
 assert f'APP_VERSION="{VERSION}"' in appimage
 assert f'VERSION="{VERSION}"' in appimage_test
 assert f'$Version = "{VERSION}"' in windows
-assert 'filevers=(2, 0, 0, 0)' in version_info and 'prodvers=(2, 0, 0, 0)' in version_info
-assert version_info.count("'2.0.0'")>=2
+assert 'filevers=(2, 1, 2, 0)' in version_info and 'prodvers=(2, 1, 2, 0)' in version_info
+assert version_info.count("'2.1.2'")>=2
 rels=meta.findall('./releases/release')
-assert len(rels)==1 and rels[0].attrib.get('version')==VERSION and rels[0].attrib.get('date')=='2026-11-01'
+assert len(rels)==1 and rels[0].attrib.get('version')==VERSION and rels[0].attrib.get('date')=='2026-11-27'
 assert f'Current release: **{VERSION}**' in readme, 'README current version'
 assert f'RiqatonyPad {VERSION}' in notes, 'RELEASE_NOTES current version'
 assert 'Ricopad 1.0.15' in notes and 'no Rwpyn modules' not in notes
 assert 'No Rwpyn modules' in notes and 'without replacing or relocating its RTF engine or codec' in notes
-assert changelog.startswith('## RiqatonyPad 2.0.0 — Stable promotion')
+assert changelog.startswith('## RiqatonyPad 2.1.2 — appearance-guard shutdown correction')
+assert '## RiqatonyPad 2.0.1 — Windows portable builder module-count correction' in changelog
+assert '## RiqatonyPad 2.0.0 — Stable promotion' in changelog
 assert '## RiqatonyPad 2.0.0-x16.9 — Find/Replace command toggle' in changelog
 assert '## RiqatonyPad 2.0.0-x16.8 — Qt QA import compatibility after app.py migration' in changelog
 assert '## RiqatonyPad 2.0.0-x16.7 — Fedora AppImage builder source-layout compatibility' in changelog
@@ -49,4 +52,16 @@ assert '## 2.0.0-x11.0 — Bounded preservation and release-engineering correcti
 assert '## 2.0.0-x10.0 — Behaviour-preserving editor file-lifecycle extraction' in changelog
 assert '## 1.0.14 — Quick Tour tooltip correction' in changelog
 assert (ROOT/'docs/history/Ricopad-1.0.15-RELEASE_NOTES.md').is_file()
-print('PASS: RiqatonyPad 2.0.0 release records and package identities are consistent')
+assert 'ApplicationPythonFiles.Count -ne 7' not in windows
+assert 'Expected the seven RiqatonyPad runtime Python modules' not in windows
+assert '$ExecutableName = "riqatonypad"' in windows
+assert 'widgets/rwpyn/character_count.py' in windows and 'widgets/message_conventions.py' in windows
+assert 'riqatony_pad.widgets.message_conventions' in windows
+assert '$SourceEditor' not in windows
+assert '$AeroRibbonIconDir' in windows and 'ribbon-icons-aero' in windows
+assert '$PackageDocs' not in windows and '$DocumentationFiles' not in windows
+assert 'Join-Path $ProjectRoot "README.md"' in windows
+assert 'Remove-Item -LiteralPath $BuildRoot -Recurse -Force' in windows
+assert '## Troubleshooting' in windows_readme and '## Packaging model' in windows_readme
+assert 'RiqatonyPad-Documentation.rtf' in windows and r'"--add-data", "$Stage\docs;docs"' in windows
+print('PASS: RiqatonyPad 2.1.2 release records and package identities are consistent')

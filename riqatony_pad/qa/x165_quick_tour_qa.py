@@ -49,7 +49,7 @@ by_id = {row[1]:row for row in specs}
 assert by_id['app-drag-drop'][-1] == 'app-drag-and-drop'
 assert by_id['editor-layout'][-1] == 'layout'
 assert by_id['editor-toolbar'][-1] == 'layout-ribbon'  # untouched group icon
-assert 'self.bind_custom_icon(action,"toolbar-tabbed" if mode=="ribbon" else "toolbar-classic")' in editor
+assert 'if icon: self.bind_custom_icon(action,icon)' in editor
 assert 'menu.menuAction().setIcon(self.custom_icon("app-drag-and-drop"))' in editor
 assert 'menu.menuAction().setIcon(selected.icon())' not in editor
 assert 'self._sync_app_drag_drop_menu_icon()' in editor
@@ -57,11 +57,11 @@ assert 'self._sync_app_drag_drop_menu_icon()' in (ROOT/'widgets/rwpyn/editor_pre
 assert 'self._sync_app_drag_drop_menu_icon()' in APP.read_text(encoding='utf-8')
 assert 'self.bind_custom_icon(getattr(self,attr).menuAction(),icon)' in ribbon
 assert 'return self.command_surface_catalog()' in editor
-assert 'self.layout_actions["ribbon"]' in ribbon and 'self.layout_actions["retro"]' in ribbon
+assert 'self.layout_actions["ribbon"]' in ribbon and 'self.layout_actions["retro"]' in ribbon and 'self.layout_actions["appmenu_only"]' in ribbon
 assert 'action.setChecked(mode == style)' in ribbon
 assert 'self.bind_custom_icon(b,icon)' in ribbon and 'self.bind_custom_icon(action,icon)' in ribbon
 assert 'for target, icon_name in tuple(self.icon_bindings):' in editor  # refreshed on theme/family change
-assert 'APP_VERSION = "2.0.0"' in APP.read_text(encoding='utf-8')
+assert 'APP_VERSION = "2.1.2"' in APP.read_text(encoding='utf-8')
 print('PASS: x16.5 retained exact icon inventory and Pad icon bindings')
 
 
@@ -78,7 +78,7 @@ TOUR = ROOT/'widgets/quick_tour.py'
 text = TOUR.read_text(encoding='utf-8')
 tree = ast.parse(text)
 func = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'show_tutorial_wizard')
-assert hashlib.sha256(ast.dump(func, include_attributes=False).encode()).hexdigest() == '669f324e6a0f8ad21dab14686e4af2f74f3860f9da4afa20e127e76b42de39fb', \
+assert hashlib.sha256(ast.dump(func, include_attributes=False).encode()).hexdigest() == '368c8da568369988fe4ab7bb5bdf2b88487430ebc584f8572e4b04b40cbcdc1d', \
     'Out-of-scope Quick Tour page content or callbacks changed'
 qt_imports = {node.module: {alias.name for alias in node.names}
               for node in tree.body if isinstance(node, ast.ImportFrom)}

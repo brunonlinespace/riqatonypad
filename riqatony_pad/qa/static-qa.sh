@@ -61,13 +61,13 @@ widget_source=(root/'widgets/rwpyn/editor_widgets.py').read_text(encoding='utf-8
 ast.parse(source); ast.parse(lifecycle_source); ast.parse(platform_source); ast.parse(commands_source); ast.parse(ribbon_source); ast.parse(format_source); ast.parse(insertion_source); ast.parse(search_view_source); ast.parse(printing_source); ast.parse(preferences_source); ast.parse((root/'widgets/rwpyn/editor_widgets.py').read_text(encoding='utf-8')); ast.parse(codec); ast.parse(support); ast.parse(rtf_new); ast.parse(shortcut_search)
 
 # Identity/tree and deliberately RTF-only scope.
-assert 'APP_VERSION = "2.0.0"' in source
+assert 'APP_VERSION = "2.1.2"' in source
 assert sorted(p.name for p in outer.iterdir())==['README.md','main.py','riqatony_pad','suite-pythoine-component.json']
 assert sorted(p.name for p in root.glob('*.py'))==['app.py', 'editor_platform_startup.py', 'rich_text_support.py', 'rtf_codec.py', 'rtf_new_document.py']
 suite_manifest=json.loads((outer/'suite-pythoine-component.json').read_text(encoding='utf-8'))
 expected_suite_manifest={
     'id':'riqatonypad','name':'RiqatonyPad','component_kind':'editor','extensions':['.rtf'],
-    'portable_command':['main.py'],'version':'2.0.0','publisher':'brunonlinespace',
+    'portable_command':['main.py'],'version':'2.1.2','publisher':'brunonlinespace',
     'desktop_id':'riqatonypad','tagline':'Friendly. Fast. Focused.',
     'publisher_id':'brunonlinespace',
     'capabilities':{'routing':True,'open':True,'create':True},
@@ -162,7 +162,7 @@ assert 'menu.addMenu("Duplicate File with Unsaved Changes")' in settings and 'me
 assert 'menu.addMenu("File Handling")' not in settings
 assert 'for theme,label in (("light","Light"),("dark","Dark"),("system","System")):' in settings
 assert '("new","Riqa Icons Harmony")' in settings and '("classic","Riqa Icons Humility")' in settings and '("original","Riqa Icons Heritage")' in settings
-assert '"Tab Width…"' in view and '"New Document Defaults…"' in view and 'Customise Retro Bar…' in view
+assert '"Tab Width…"' in view and '"New Document Defaults…"' in view and 'Retro Settings…' in view and 'Disabled (AppMenu only)' in view
 assert '"Dark Editor"' in view and '"Dark Editor Canvas"' not in view
 assert 'QAction("Find",self)' in edit and 'menu,"Find and Replace"' in edit and 'menu.addAction(self.search_bar_action)' in edit
 assert edit.index('"Delete Line"') < edit.index('menu.addSeparator()', edit.index('"Delete Line"')) < edit.index('"Select All"')
@@ -461,11 +461,11 @@ assert (meta.findtext("url[@type='bugtracker']") or '').strip()=='https://github
 dev=meta.find("developer[@id='io.github.brunonlinespace']"); assert dev is not None and (dev.findtext('name') or '').strip()=='Bruno Machado'
 assert meta.find("content_rating[@type='oars-1.1']") is not None
 rels=meta.findall('./releases/release'); assert len(rels)==1
-assert rels[0].attrib.get('version')=='2.0.0' and rels[0].attrib.get('date')=='2026-11-01'
+assert rels[0].attrib.get('version')=='2.1.2' and rels[0].attrib.get('date')=='2026-11-27'
 
 # Packaging remains non-privileged and runs source/Qt/final-artifact gates.
 app=(root/'packaging/fedora/build-appimage.sh').read_text(encoding='utf-8')
-for needle in ('APP_VERSION="2.0.0"','RIQATONYPAD_ALLOW_ROOT_BUILD','RIQATONYPAD_ALLOW_UNSUPPORTED_HOST','PYTHONDONTWRITEBYTECODE=1','clean_source_python_caches','--exclude-module PyQt6.QtPdf','--exclude-module PyQt6.QtPdfWidgets','--exclude-module PyQt6.QtWebEngineCore','Qt Print Support was not bundled','Running Qt-backed RTF save/round-trip QA','extract_final_appimage','run_format_parity_probe','Portable/AppImage live document formatting parity failed'):
+for needle in ('APP_VERSION="2.1.2"','RIQATONYPAD_ALLOW_ROOT_BUILD','RIQATONYPAD_ALLOW_UNSUPPORTED_HOST','PYTHONDONTWRITEBYTECODE=1','clean_source_python_caches','--exclude-module PyQt6.QtPdf','--exclude-module PyQt6.QtPdfWidgets','--exclude-module PyQt6.QtWebEngineCore','Qt Print Support was not bundled','Running Qt-backed RTF save/round-trip QA','extract_final_appimage','run_format_parity_probe','Portable/AppImage live document formatting parity failed'):
     assert needle in app,needle
 assert 'COMPONENT_MANIFEST="${PROJECT_ROOT}/suite-pythoine-component.json"' in app
 assert 'Unsafe BUILD_ROOT outside' in app and 'validate_build_root' in app
@@ -477,14 +477,21 @@ for runtime_module in ('widgets/rwpyn/editor_lifecycle.py','editor_platform_star
     assert runtime_module in app, runtime_module
 assert not re.search(r'^[ \t]*(?:sudo|dnf|pkexec|su)(?:[ \t]|$)',app,re.M)
 assert 'Do not fail on QtPdf/QtPdfWidgets payload files' in app
-post=(root/'packaging/fedora/test-appimage.sh').read_text(encoding='utf-8'); assert 'VERSION="2.0.0"' in post
+post=(root/'packaging/fedora/test-appimage.sh').read_text(encoding='utf-8'); assert 'VERSION="2.1.2"' in post
 highlight_runtime=(root/'qa/highlight-runtime-qa.py').read_text(encoding='utf-8')
 assert 'window._skip_close_save_prompt = True' in highlight_runtime
 assert 'def close_surface(window):' in highlight_runtime
 assert not re.search(r'(?m)^\s*w\.close\(\)\s*$', highlight_runtime)
 win=(root/'packaging/windows/build-windows-portable.ps1').read_text(encoding='utf-8'); vi=(root/'packaging/windows/windows-version-info.txt').read_text(encoding='utf-8')
-assert '$Version = "2.0.0"' in win and all(name in win for name in ('rtf_codec.py','rich_text_support.py','rtf_new_document.py','widgets/keyboard_shortcuts.py','qt-rtf-qa.py'))
-assert 'filevers=(2, 0, 0, 0)' in vi and 'prodvers=(2, 0, 0, 0)' in vi and "'2.0.0'" in vi
+assert '$Version = "2.1.2"' in win and all(name in win for name in ('rtf_codec.py','rich_text_support.py','rtf_new_document.py','widgets/keyboard_shortcuts.py','qt-rtf-qa.py','ribbon-icons-aero'))
+assert 'ApplicationPythonFiles.Count -ne 7' not in win and 'Expected the seven RiqatonyPad runtime Python modules' not in win
+assert '$ExecutableName = "riqatonypad"' in win and '"--name", $ExecutableName' in win
+assert '$PackageDocs' not in win and '$DocumentationFiles' not in win and 'Join-Path $ProjectRoot "README.md"' in win
+assert 'widgets/rwpyn/character_count.py' in win and 'widgets/message_conventions.py' in win
+assert 'riqatony_pad.widgets.message_conventions' in win and '"--hidden-import", "riqatony_pad.widgets.message_conventions"' in win
+assert '$SourceEditor' not in win
+assert "StringStruct('OriginalFilename', 'riqatonypad.exe')" in vi
+assert 'filevers=(2, 1, 2, 0)' in vi and 'prodvers=(2, 1, 2, 0)' in vi and "'2.1.2'" in vi
 
 # Corpus/tree cleanliness.
 assert len(list((root/'qa/rtf-corpus').glob('*.rtf')))>=20
@@ -560,7 +567,27 @@ run_if_current "$ROOT/qa/x121-packaging-cleanup-qa.py" "x12.1 archived packaging
 run_if_current "$ROOT/qa/x122-shebang-qa.py" "x12.2 all Python shebangs and unchanged module content"
 printf "SKIP: archived x123-widget-tree-qa.py unchanged-method fingerprint; x13.2 exact-scope gate covers approved edits\n"
 run_if_current "$ROOT/qa/x124-shortcut-search-qa.py" "x12.4 shortcut-search helper relocation"
-printf 'RiqatonyPad 2.0.0 static QA completed successfully.\n'
+python3 - "$ROOT" <<'PY2'
+from pathlib import Path
+import sys
+root=Path(sys.argv[1])
+appearance=(root/'widgets/editor_commands_appearance.py').read_text(encoding='utf-8')
+app=(root/'app.py').read_text(encoding='utf-8')
+win=(root/'packaging/windows/build-windows-portable.ps1').read_text(encoding='utf-8')
+winread=(root/'packaging/windows/README.md').read_text(encoding='utf-8')
+rtf=(root/'docs/RiqatonyPad-Documentation.rtf').read_text(encoding='utf-8')
+for fragment in ('class AppearanceThemeGuard(QObject):','self._window_ref = weakref.ref(window)','self._restore_timer = QTimer(self)','application.aboutToQuit.connect(self.shutdown)','hints.colorSchemeChanged.connect(self._system_scheme_changed)','self._restore_timer.start()','window.apply_appimage_theme(selected)','application.removeEventFilter(self)','application.aboutToQuit.disconnect(self.shutdown)','hints.unsetColorScheme()','application.setPalette(QPalette())'):
+    assert fragment in appearance, fragment
+for retired in ('self.window = window','QTimer.singleShot(0, self._restore)'):
+    assert retired not in appearance, retired
+assert 'self._appearance_theme_guard = AppearanceThemeGuard(self)' in app
+assert 'Remove-Item -LiteralPath $BuildRoot -Recurse -Force' in win
+assert '## Troubleshooting' in winread and '## Packaging model' in winread
+assert '\\fs40\\b\\cf1 RiqatonyPad Documentation' in rtf and '\\fs30\\b\\cf2 ' not in rtf
+print('PASS: 2.1.2 live-theme, Windows cleanup/readme, and brick documentation headings')
+PY2
+
+printf 'RiqatonyPad 2.1.2 static QA completed successfully.\n'
 
 run_if_current "$ROOT/qa/x125-dialog-extraction-qa.py" "x12.5 archived dialog contract"
 

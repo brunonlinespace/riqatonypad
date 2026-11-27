@@ -128,10 +128,10 @@ help_rtf = (ROOT / "docs" / "RiqatonyPad-Documentation.rtf").read_text(encoding=
 for needle in (
     "View > Editor Miscellaneous > New Document Defaults",
     "same shared command registry",
-    "reordered modifiers",
+    "including modifier aliases",
     "PyWordpad",
     "Microsoft WordPad-inspired",
-    "RiqatonyPad 1.1.2",
+    "RiqatonyPad 2.1.2",
 ):
     require(needle in help_rtf, f"bundled Help cleanup missing: {needle}")
 require("View > More Settings > New Document Defaults" not in help_rtf, "stale Help path remains")

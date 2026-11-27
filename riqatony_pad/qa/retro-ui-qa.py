@@ -40,7 +40,7 @@ assert menus=={'editor-layout','editor-toolbar','app-theme','app-icons','app-dra
 for _group,_id,_label,kind,_attr,icon in specs:
     if kind in {'action','menu'}:
         assert icon, _id
-        for family in ('ribbon-icons','ribbon-icons-classic','ribbon-icons-original'):
+        for family in ('ribbon-icons','ribbon-icons-classic','ribbon-icons-original','ribbon-icons-aero'):
             for variant in ('light','dark'):
                 assert (root/'assets'/family/variant/f'{icon}.png').is_file(),(_id,family,variant,'png')
 
@@ -76,7 +76,10 @@ assert 'RIBBON_FONT_FAMILY_WIDTH = RIBBON_BUTTON_SIZE * 2' in ribbon_source
 assert 'widget.setFixedSize(RIBBON_FONT_FAMILY_WIDTH,RIBBON_BUTTON_SIZE)' in geometry
 assert 'widget.setFixedSize(RIBBON_BUTTON_SIZE,RIBBON_BUTTON_SIZE)' in geometry
 assert 'toolbar.setFixedHeight(body_height+scrollbar_height)' in geometry
-assert 'Customise Retro Bar…' in commands_source
+assert 'Retro Settings…' in commands_source and 'Disabled (AppMenu only)' in commands_source
+assert 'settings_button.setDefaultAction(self.retro_toolbar_action)' in rebuild
+assert 'Clear All' in segment('show_retro_toolbar_dialog')
+assert 'appmenu_only' in segment('set_interface_style')
 context_menu=segment('_show_toolbar_context_menu')
-assert 'self.layout_actions["ribbon"]' in context_menu and 'self.layout_actions["retro"]' in context_menu and 'self.retro_toolbar_action' in context_menu
-print(f'PASS: RiqatonyPad 1.0.4 shared Ribbon/Retro registry ({len(specs)} configurable controls; {len(defaults)} defaults)')
+assert 'self.layout_actions["ribbon"]' in context_menu and 'self.layout_actions["retro"]' in context_menu and 'self.layout_actions["appmenu_only"]' in context_menu and 'self.retro_toolbar_action' in context_menu
+print(f'PASS: RiqatonyPad 2.1.2 shared Ribbon/Retro/AppMenu-only registry ({len(specs)} configurable controls; {len(defaults)} defaults)')

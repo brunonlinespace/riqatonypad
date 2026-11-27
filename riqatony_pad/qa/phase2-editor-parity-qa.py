@@ -67,11 +67,11 @@ for label in ("Toolbar Top / Find Bottom","Toolbar Top / Find Top","Toolbar Bott
     assert label in view,label
 layout=seg("apply_workspace_layout")
 for needle in (
-    'self.main_layout.addWidget(interface); self.main_layout.addWidget(self.search_container); add_editor_block()',
-    'add_editor_block(); self.main_layout.addWidget(self.search_container); self.main_layout.addWidget(interface)',
-    'self.main_layout.addWidget(interface); add_editor_block(); self.main_layout.addWidget(self.search_container)',
-    'self.main_layout.addWidget(self.search_container); add_editor_block(); self.main_layout.addWidget(interface)',
+    'self.main_layout.addWidget(self.search_container); add_editor_block()',
+    'add_editor_block(); self.main_layout.addWidget(self.search_container)',
 ): assert needle in layout,needle
+assert layout.count('if interface is not None: self.main_layout.addWidget(interface)') == 4
+assert 'interface=None if self.interface_style=="appmenu_only"' in layout
 # Audit 9: exact 40-entry curated inventory, old 32 in order plus approved eight.
 symbol_method=methods["show_symbols_popup"]
 symbols=None

@@ -48,3 +48,30 @@ for fragment in (
 ):
     assert fragment in source,fragment
 print("PASS: RiqatonyPad 0.8.5 Phase 1C live theme-switch parity")
+
+# 2.1.2: keep the 2.1.1 theme behavior but detach the guard cleanly before Qt/SIP teardown.
+for fragment in (
+    'class AppearanceThemeGuard(QObject):',
+    'self._window_ref = weakref.ref(window)',
+    'self._restore_timer = QTimer(self)',
+    'self._restore_timer.setSingleShot(True)',
+    'application.aboutToQuit.connect(self.shutdown)',
+    'hints.colorSchemeChanged.connect(self._system_scheme_changed)',
+    'QEvent.Type.PaletteChange',
+    'QEvent.Type.ApplicationPaletteChange',
+    'QEvent.Type.StyleChange',
+    'self._restore_timer.start()',
+    'window.apply_appimage_theme(selected)',
+    'application.removeEventFilter(self)',
+    'application.styleHints().colorSchemeChanged.disconnect(self._system_scheme_changed)',
+    'application.aboutToQuit.disconnect(self.shutdown)',
+):
+    assert fragment in source, fragment
+for retired in (
+    'self.window = window',
+    'QTimer.singleShot(0, self._restore)',
+):
+    assert retired not in source, retired
+app_source=(ROOT/'app.py').read_text(encoding='utf-8')
+assert 'self._appearance_theme_guard = AppearanceThemeGuard(self)' in app_source
+print("PASS: RiqatonyPad 2.1.2 shutdown-safe MaqaronyPad-style live appearance guard")
